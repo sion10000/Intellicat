@@ -163,7 +163,7 @@ Pin 6	GND	GND
 
 Important: PCA9685 VCC is logic voltage. Use 3.3V from the Pi for VCC (not 5V).
 
-7.3 Servo power (external 5V!) — do not skip this
+### 7.3 Servo power (external 5V!) — do not skip this
 Do not power multiple servos from the Pi’s 5V pin.
 
 Connect external servo PSU to PCA9685:
@@ -172,12 +172,12 @@ External PSU	PCA9685
 +5V	V+
 GND	GND
 
-7.4 Common ground (mandatory)
+### 7.4 Common ground (mandatory)
 You MUST share ground:
 
 Pi GND ↔ PCA9685 GND ↔ External PSU GND
 
-7.5 Plug servos into PCA9685 channels
+### 7.5 Plug servos into PCA9685 channels
 Each channel has: GND / V+ / Signal
 
 SG90 wires:
@@ -188,7 +188,7 @@ Red = +5V
 
 Orange/Yellow = Signal
 
-7.6 Default PCA channel mapping (can be overridden)
+### 7.6 Default PCA channel mapping (can be overridden)
 Servo 1 → PCA channel 0
 
 Servo 2 → PCA channel 1
@@ -204,7 +204,9 @@ sudo apt-get install -y i2c-tools
 i2cdetect -y 1
 You usually see 0x40 unless you changed the board address jumpers.
 
-8) Bluetooth setup (Option A: auto /dev/rfcomm0 after reboot)
+---
+
+## 8) Bluetooth setup (Option A: auto /dev/rfcomm0 after reboot)
 Intellicat does not run rfcomm listen/connect inside Python.
 Instead, you set up systemd services so RFCOMM connects automatically after reboot.
 
@@ -215,14 +217,14 @@ Pi 2 has /dev/rfcomm0 (client connected)
 
 Intellicat.py can start manually anytime and immediately communicate
 
-8.1 Install Bluetooth tools (both Pis)
+### 8.1 Install Bluetooth tools (both Pis)
 bash
 Copy code
 sudo apt-get update
 sudo apt-get install -y bluetooth bluez rfkill
 sudo systemctl enable --now bluetooth
 sudo rfkill unblock bluetooth
-8.2 Find each Pi’s Bluetooth MAC
+### 8.2 Find each Pi’s Bluetooth MAC
 On each Pi:
 
 bash
@@ -237,7 +239,7 @@ Pi 1 MAC
 
 Pi 2 MAC
 
-8.3 Pair + trust (recommended one-time)
+### 8.3 Pair + trust (recommended one-time)
 Do on BOTH Pis (swap MACs accordingly):
 
 bash
@@ -269,8 +271,10 @@ Paired: yes
 
 Trusted: yes
 
-9) systemd services (create /dev/rfcomm0 after boot)
-9.1 Pi 1 (MAIN): rfcomm-server.service
+---
+
+## 9) systemd services (create /dev/rfcomm0 after boot)
+### 9.1 Pi 1 (MAIN): rfcomm-server.service
 Create:
 
 bash
@@ -301,7 +305,7 @@ bash
 Copy code
 sudo systemctl daemon-reload
 sudo systemctl enable --now rfcomm-server.service
-9.2 Pi 2 (SECONDARY): rfcomm-client.service
+### 9.2 Pi 2 (SECONDARY): rfcomm-client.service
 Create:
 
 bash
@@ -332,7 +336,7 @@ bash
 Copy code
 sudo systemctl daemon-reload
 sudo systemctl enable --now rfcomm-client.service
-9.3 Verify after reboot
+### 9.3 Verify after reboot
 Reboot both:
 
 bash
@@ -360,11 +364,14 @@ Pi 2:
 bash
 Copy code
 sudo cat /dev/rfcomm0
-10) Software installation (Python + dependencies)
+
+---
+
+## 10) Software installation (Python + dependencies)
 Important note (externally-managed environment)
 Use a venv to install Python packages (recommended on Raspberry Pi OS).
 
-10.1 Base packages (both Pis)
+### 10.1 Base packages (both Pis)
 bash
 Copy code
 sudo apt-get update
@@ -381,7 +388,7 @@ Or use pip (inside venv):
 bash
 Copy code
 pip install opencv-python
-10.2 Create + activate venv
+### 10.2 Create + activate venv
 In your Intellicat project folder:
 
 bash
@@ -389,7 +396,7 @@ Copy code
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
-10.3 Install Python dependencies (inside venv)
+### 10.3 Install Python dependencies (inside venv)
 bash
 Copy code
 pip install ultralytics numpy pyserial adafruit-blinka adafruit-circuitpython-pca9685 adafruit-circuitpython-motor
@@ -398,7 +405,10 @@ Optional (only needed if your script uses USB keyboard hotkeys without a termina
 bash
 Copy code
 pip install evdev
-11) YOLO model setup (reference used)
+
+---
+
+## 11) YOLO model setup (reference used)
 Intellicat uses a YOLO detection model. For setting up YOLO on Raspberry Pi, I used this guide:
 
 https://www.ejtech.io/learn/yolo-on-raspberry-pi
@@ -409,16 +419,18 @@ yolo11n_ncnn_model
 
 Make sure that yolo11n_ncnn_model exists on each Pi in the directory where you run the script (or update the script’s model path accordingly).
 
-12) Running Intellicat (manual after boot)
+---
+
+## 12) Running Intellicat (manual after boot)
 Intellicat must run on both Pis.
 
-12.1 Pi 1 (MAIN)
+### 12.1 Pi 1 (MAIN)
 bash
 Copy code
 cd /path/to/your/project
 source venv/bin/activate
 python3 Intellicat.py --role=main --enable-manual-start --no-gui
-12.2 Pi 2 (SECONDARY)
+### 12.2 Pi 2 (SECONDARY)
 bash
 Copy code
 cd /path/to/your/project
@@ -432,7 +444,9 @@ Notes:
 
 If you run without --no-gui, press q in the OpenCV window to quit.
 
-13) Manual controls (while running)
+---
+
+## 13) Manual controls (while running)
 These controls work only if you started with --enable-manual-start.
 
 Terminal commands (MAIN recommended)
@@ -456,7 +470,10 @@ faster
 slower
 speed?
 help
-14) Script defaults (unless overridden)
+
+---
+
+## 14) Script defaults (unless overridden)
 Intellicat defaults:
 
 Model: yolo11n_ncnn_model
@@ -479,19 +496,26 @@ Cat-but-not-close stop: 120 seconds (2 minutes)
 
 Servo angle limits and movement order are as described earlier in this README.
 
-15) Permissions: /dev/rfcomm0
+---
+
+## 15) Permissions: /dev/rfcomm0
 If you get permission errors opening /dev/rfcomm0, add your user to dialout:
 
 bash
 Copy code
 sudo usermod -aG dialout $USER
 sudo reboot
-16) How to quit
+
+---
+
+## 16) How to quit
 In terminal: Ctrl + C
 
 In GUI mode: press q in the OpenCV window
 
-17) Troubleshooting
+---
+
+## 17) Troubleshooting
 /dev/rfcomm0 missing after reboot
 Check services:
 
@@ -545,14 +569,16 @@ reduce mechanical load
 
 keep power wires short/thick
 
-18) Safety notes
+## 18) Safety notes
 Moving parts can pinch. Keep paws/whiskers safe.
 
 Secure wires so pets can’t chew them.
 
 Always power servos correctly (external 5V recommended).
 
-19) License / disclaimer
+---
+
+## 19) License / disclaimer
 Use at your own risk. This is a hobby project.
 Recommended license: MIT.
 
